@@ -2,7 +2,11 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -12,16 +16,74 @@ import {
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiParam,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
 import { CreateImageDto } from './dto/create-image.dto';
-import { ImagesService, PublicImageResponse } from './images.service';
+import { ListImagesQueryDto } from './dto/list-images-query.dto';
+import {
+  ImagesService,
+  PaginatedImagesResponse,
+  PublicImageResponse,
+} from './images.service';
 
 @ApiTags('images')
 @Controller('images')
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
+
+  @Get()
+  @ApiQuery({ name: 'title', required: false, type: String })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+  @ApiOkResponse({
+    schema: {
+      example: {
+        data: [
+          {
+            id: '2d69d8a8-51e9-447d-a0a0-eec4a2c99b7f',
+            url: 'http://localhost:3000/uploads/image.webp',
+            title: 'Profile photo',
+            width: 800,
+            height: 600,
+          },
+        ],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 1,
+          totalPages: 1,
+        },
+      },
+    },
+  })
+  findAll(@Query() query: ListImagesQueryDto): Promise<PaginatedImagesResponse> {
+    return this.imagesService.findAll(query);
+  }
+
+  @Get(':id')
+  @ApiParam({ name: 'id', type: String })
+  @ApiOkResponse({
+    schema: {
+      example: {
+        id: '2d69d8a8-51e9-447d-a0a0-eec4a2c99b7f',
+        url: 'http://localhost:3000/uploads/image.webp',
+        title: 'Profile photo',
+        width: 800,
+        height: 600,
+      },
+    },
+  })
+  @ApiNotFoundResponse({ description: 'Image not found.' })
+  findOne(
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<PublicImageResponse> {
+    return this.imagesService.findOne(id);
+  }
 
   @Post()
   @UseInterceptors(

@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateImageDto } from './dto/create-image.dto';
+import { ListImagesQueryDto } from './dto/list-images-query.dto';
 import { Image } from './image.entity';
 import { ImageProcessorService } from './image-processor.service';
 import { LocalImagesStorageService } from './local-images-storage.service';
@@ -14,6 +15,18 @@ export interface PublicImageResponse {
   width: number;
   height: number;
 }
+
+export interface PaginatedImagesResponse {
+  data: PublicImageResponse[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+const maxListLimit = 50;
 
 @Injectable()
 export class ImagesService {
@@ -45,6 +58,44 @@ export class ImagesService {
       height,
       size: processedImage.size,
     });
+
+    return this.toPublicResponse(image);
+  }
+
+  async findAll(query: ListImagesQueryDto): Promise<PaginatedImagesResponse> {
+    const page = Math.max(query.page ?? 1, 1);
+    const limit = Math.min(Math.max(query.limit ?? 10, 1), maxListLimit);
+    const queryBuilder = this.imagesRepository
+      .createQueryBuilder('image')
+      .orderBy('image.createdAt', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    if (query.title?.trim()) {
+      queryBuilder.where('image.title ILIKE :title', {
+        title: `%${query.title.trim()}%`,
+      });
+    }
+
+    const [images, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      data: images.map((image) => this.toPublicResponse(image)),
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async findOne(id: string): Promise<PublicImageResponse> {
+    const image = await this.imagesRepository.findOne({ where: { id } });
+
+    if (!image) {
+      throw new NotFoundException('Image not found.');
+    }
 
     return this.toPublicResponse(image);
   }
