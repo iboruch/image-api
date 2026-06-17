@@ -32,6 +32,27 @@ import {
   PublicImageResponse,
 } from './images.service';
 
+export const imageIdPipe = new ParseUUIDPipe({
+  errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+  exceptionFactory: () => new BadRequestException('Image id must be a UUID.'),
+});
+
+export function supportedImageFileFilter(
+  _request: unknown,
+  file: Express.Multer.File,
+  callback: (error: Error | null, acceptFile: boolean) => void,
+) {
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) {
+    callback(
+      new BadRequestException('File must be a jpg, jpeg, png, or webp image.'),
+      false,
+    );
+    return;
+  }
+
+  callback(null, true);
+}
+
 @ApiTags('images')
 @Controller('images')
 export class ImagesController {
@@ -87,17 +108,7 @@ export class ImagesController {
   })
   @ApiBadRequestResponse({ description: 'Image id must be a UUID.' })
   @ApiNotFoundResponse({ description: 'Image not found.' })
-  findOne(
-    @Param(
-      'id',
-      new ParseUUIDPipe({
-        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
-        exceptionFactory: () =>
-          new BadRequestException('Image id must be a UUID.'),
-      }),
-    )
-    id: string,
-  ): Promise<PublicImageResponse> {
+  findOne(@Param('id', imageIdPipe) id: string): Promise<PublicImageResponse> {
     return this.imagesService.findOne(id);
   }
 
@@ -105,19 +116,7 @@ export class ImagesController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
-      fileFilter: (_request, file, callback) => {
-        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) {
-          callback(
-            new BadRequestException(
-              'File must be a jpg, jpeg, png, or webp image.',
-            ),
-            false,
-          );
-          return;
-        }
-
-        callback(null, true);
-      },
+      fileFilter: supportedImageFileFilter,
     }),
   )
   @ApiConsumes('multipart/form-data')
