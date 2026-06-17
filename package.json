@@ -8,13 +8,22 @@
     "node": ">=22"
   },
   "scripts": {
+    "check:node": "node scripts/check-node-version.js",
+    "prebuild": "npm run check:node",
     "build": "tsc -p tsconfig.build.json",
+    "prestart": "npm run check:node",
     "start": "node dist/main",
+    "prestart:dev": "npm run check:node",
     "start:dev": "ts-node -r tsconfig-paths/register src/main.ts",
+    "prestart:prod": "npm run check:node",
     "start:prod": "node dist/main",
+    "prelint": "npm run check:node",
     "lint": "eslint \"src/**/*.ts\"",
+    "pretest": "npm run check:node",
     "test": "jest",
+    "pretest:watch": "npm run check:node",
     "test:watch": "jest --watch",
+    "pretest:cov": "npm run check:node",
     "test:cov": "jest --coverage"
   },
   "dependencies": {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -15,8 +15,12 @@ export class LocalImagesStorageService {
       ? uploadDir
       : join(process.cwd(), uploadDir);
 
-    await mkdir(uploadPath, { recursive: true });
-    await writeFile(join(uploadPath, filename), buffer);
+    try {
+      await mkdir(uploadPath, { recursive: true });
+      await writeFile(join(uploadPath, filename), buffer);
+    } catch {
+      throw new InternalServerErrorException('Could not save image file.');
+    }
 
     return filename;
   }

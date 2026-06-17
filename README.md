@@ -48,6 +48,7 @@ Database migrations run automatically when the API starts. This keeps schema cre
 ### Local Development
 
 ```sh
+nvm use
 npm install
 npm run start:dev
 ```

@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
@@ -39,7 +40,13 @@ export class ImagesController {
   @Get()
   @ApiQuery({ name: 'title', required: false, type: String })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
-  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    example: 10,
+    description: 'Maximum value is 50.',
+  })
   @ApiOkResponse({
     schema: {
       example: {
@@ -78,9 +85,18 @@ export class ImagesController {
       },
     },
   })
+  @ApiBadRequestResponse({ description: 'Image id must be a UUID.' })
   @ApiNotFoundResponse({ description: 'Image not found.' })
   findOne(
-    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param(
+      'id',
+      new ParseUUIDPipe({
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+        exceptionFactory: () =>
+          new BadRequestException('Image id must be a UUID.'),
+      }),
+    )
+    id: string,
   ): Promise<PublicImageResponse> {
     return this.imagesService.findOne(id);
   }
@@ -89,6 +105,19 @@ export class ImagesController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
+      fileFilter: (_request, file, callback) => {
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) {
+          callback(
+            new BadRequestException(
+              'File must be a jpg, jpeg, png, or webp image.',
+            ),
+            false,
+          );
+          return;
+        }
+
+        callback(null, true);
+      },
     }),
   )
   @ApiConsumes('multipart/form-data')

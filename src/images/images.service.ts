@@ -26,8 +26,6 @@ export interface PaginatedImagesResponse {
   };
 }
 
-const maxListLimit = 50;
-
 @Injectable()
 export class ImagesService {
   constructor(
@@ -64,7 +62,7 @@ export class ImagesService {
 
   async findAll(query: ListImagesQueryDto): Promise<PaginatedImagesResponse> {
     const page = Math.max(query.page ?? 1, 1);
-    const limit = Math.min(Math.max(query.limit ?? 10, 1), maxListLimit);
+    const limit = query.limit ?? 10;
     const queryBuilder = this.imagesRepository
       .createQueryBuilder('image')
       .orderBy('image.createdAt', 'DESC')

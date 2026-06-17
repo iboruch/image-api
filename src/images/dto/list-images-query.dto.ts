@@ -8,14 +8,14 @@ export class ListImagesQueryDto {
 
   @IsOptional()
   @Type(() => Number)
-  @IsInt()
-  @IsPositive()
+  @IsPositive({ message: 'Page must be a positive integer.' })
+  @IsInt({ message: 'Page must be a positive integer.' })
   page?: number;
 
   @IsOptional()
   @Type(() => Number)
-  @IsInt()
-  @IsPositive()
-  @Max(50)
+  @Max(50, { message: 'Limit must be less than or equal to 50.' })
+  @IsPositive({ message: 'Limit must be a positive integer.' })
+  @IsInt({ message: 'Limit must be a positive integer.' })
   limit?: number;
 }
