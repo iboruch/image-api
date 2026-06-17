@@ -24,12 +24,4 @@ export class LocalImagesStorageService {
 
     return filename;
   }
-
-  // Local storage can be replaced later with S3-compatible storage:
-  // await s3Client.send(new PutObjectCommand({
-  //   Bucket: bucketName,
-  //   Key: filename,
-  //   Body: buffer,
-  //   ContentType: 'image/webp',
-  // }));
 }
