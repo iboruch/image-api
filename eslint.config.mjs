@@ -17,6 +17,8 @@ export default [
       globals: {
         console: 'readonly',
         process: 'readonly',
+        Buffer: 'readonly',
+        Express: 'readonly',
         module: 'readonly',
         __dirname: 'readonly',
       },

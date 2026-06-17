@@ -31,6 +31,18 @@ Health check:
 curl http://localhost:3000/health
 ```
 
+Upload an image:
+
+```sh
+curl -X POST http://localhost:3000/images \
+  -F "title=Profile photo" \
+  -F "width=800" \
+  -F "height=600" \
+  -F "file=@/path/to/image.jpg"
+```
+
+The response includes a `url` field. Open that URL in a browser to verify the processed WebP file is being served.
+
 Database migrations run automatically when the API starts. This keeps schema creation explicit while avoiding a separate migration command for the current small setup.
 
 ### Local Development

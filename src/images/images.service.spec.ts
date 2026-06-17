@@ -1,6 +1,9 @@
 import { ConfigService } from '@nestjs/config';
 import { ImagesService } from './images.service';
 import { Image } from './image.entity';
+import { Repository } from 'typeorm';
+import { ImageProcessorService } from './image-processor.service';
+import { LocalImagesStorageService } from './local-images-storage.service';
 
 describe('ImagesService', () => {
   it('maps an image record to public response', () => {
@@ -14,7 +17,12 @@ describe('ImagesService', () => {
         return values[key];
       }),
     } as unknown as ConfigService;
-    const service = new ImagesService(configService);
+    const service = new ImagesService(
+      {} as Repository<Image>,
+      configService,
+      {} as ImageProcessorService,
+      {} as LocalImagesStorageService,
+    );
 
     expect(
       service.toPublicResponse({
