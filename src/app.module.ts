@@ -4,6 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
+import { CreateImagesTable1718600000000 } from './database/migrations/1718600000000-create-images-table';
+import { ImagesModule } from './images/images.module';
 
 @Module({
   imports: [
@@ -21,9 +23,12 @@ import databaseConfig from './config/database.config';
         password: configService.getOrThrow<string>('database.password'),
         database: configService.getOrThrow<string>('database.name'),
         autoLoadEntities: true,
+        migrations: [CreateImagesTable1718600000000],
+        migrationsRun: true,
         synchronize: false,
       }),
     }),
+    ImagesModule,
   ],
   controllers: [AppController],
 })

@@ -13,6 +13,8 @@ services:
       DATABASE_USER: ${DATABASE_USER:-image_api}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD:-image_api}
       DATABASE_NAME: ${DATABASE_NAME:-image_api}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:3000}
+      UPLOAD_DIR: ${UPLOAD_DIR:-uploads}
     depends_on:
       postgres:
         condition: service_healthy

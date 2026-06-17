@@ -36,6 +36,7 @@ export default [
         describe: 'readonly',
         expect: 'readonly',
         it: 'readonly',
+        jest: 'readonly',
       },
     },
   },

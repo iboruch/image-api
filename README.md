@@ -31,6 +31,8 @@ Health check:
 curl http://localhost:3000/health
 ```
 
+Database migrations run automatically when the API starts. This keeps schema creation explicit while avoiding a separate migration command for the current small setup.
+
 ### Local Development
 
 ```sh
